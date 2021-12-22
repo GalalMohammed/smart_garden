@@ -77,10 +77,9 @@ void loop() {
     }
     
   }
-  if (analogRead(soilSens) / 1024.0 > .82)
+  else if (analogRead(soilSens) / 1024.0 > .82)
   {
     digitalWrite(pump, 0);
-    updateLCD();
   }
   else
   {
