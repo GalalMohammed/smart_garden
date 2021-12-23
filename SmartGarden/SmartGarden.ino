@@ -87,6 +87,10 @@ void loop() {
     }
 
   }
+  else if ((1 - analogRead(soilSens) / 1024.0) < .18) // if the soil is too dry
+  {
+    pumping(1);
+  }
   else //turning off the pump
   {
     pumping(0);
