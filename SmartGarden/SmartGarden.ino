@@ -1,3 +1,13 @@
+/*
+   This system makes a pump work 2 times per day(in early morning and sunset, which is determined using an LDR sensor) if the temperature is low, otherwise, it would work 3 times.
+   Every time before opening the water it checks the moisture of the soil that it is below 18%.
+   If it rains, the next time of watering will be canceled.
+   Led would be turned on at night.
+   Time and sensors values would be displayed on an LCD.
+
+   When we turn on the pump, we write a 0 on its pin. We use a relay module with low level trigger.
+*/
+
 #include <LiquidCrystal.h>
 
 #define ldr A5
@@ -48,7 +58,7 @@ void loop() {
     {
       pumping(1);
     }
-    if (!(analogRead(ldr) < earlyTimeLDRmax && analogRead(ldr) > earlyTimeLDRmin))
+    if (!(analogRead(ldr) < earlyTimeLDRmax && analogRead(ldr) > earlyTimeLDRmin)) //to make sure that this time is finished to toggle the waterFlag again
     {
       waterFlag = 1;
     }
@@ -59,36 +69,32 @@ void loop() {
     {
       pumping(1);
     }
-    if (!(analogRead(ldr) < sunSetTimeLDRmax && analogRead(ldr) > sunSetTimeLDRmin))
+    if (!(analogRead(ldr) < sunSetTimeLDRmax && analogRead(ldr) > sunSetTimeLDRmin)) //to make sure that this time is finished to toggle the waterFlag again
     {
       waterFlag = 1;
     }
   }
-  else if (analogRead(tmp) * 500 / 1024.0 > tmpThreshold && millis() - lastTime > 24 * 60 * 60 * 1000)
+  else if (analogRead(tmp) * 500 / 1024.0 > tmpThreshold && millis() - lastTime > 24 * 60 * 60 * 1000) //if the temperature is HIGH and last time was before 24 hours or more
   {
     if (waterFlag)
     {
       pumping(1);
-      lastTime = millis();
+      lastTime = millis(); //updating the lastTime variable value
     }
-    if (!(analogRead(tmp) * 500 / 1024.0 > tmpThreshold && millis() - lastTime > 24 * 60 * 60 * 1000))
+    if (!(analogRead(tmp) * 500 / 1024.0 > tmpThreshold && millis() - lastTime > 24 * 60 * 60 * 1000)) //to make sure that this time is finished to toggle the waterFlag again
     {
       waterFlag = 1;
     }
-    
+
   }
-  else if (analogRead(soilSens) / 1024.0 > .82)
-  {
-    digitalWrite(pump, 0);
-  }
-  else
+  else //turning off the pump
   {
     pumping(0);
   }
 
   if (analogRead(rainSens) < rainIndicationVal)
   {
-    waterFlag = 0;
+    waterFlag = 0; //clearing the waterFlag to cancel the next time of watering
   }
 
   if (analogRead(ldr) < nightIndication)
@@ -108,24 +114,29 @@ void loop() {
 
 void pumping(byte state)
 {
-  if (analogRead(soilSens) / 1024.0 < .18 && analogRead(soilSens) / 1024.0 > .2 && state)
+  /*This void function controls the pump, that it would work only if the moisture is less than 18%.
+     Arguments: You should pass 1 for turning on the pump, and 0 for turning it off, otherwise, nothing happens.
+  */
+  if ((1 - analogRead(soilSens) / 1024.0) < .18 && state)
   {
-    while(analogRead(soilSens) / 1024.0 < .18 && analogRead(soilSens) / 1024.0 > .2 && state)
+    while ((1 - analogRead(soilSens) / 1024.0) < .18) //continue watering until the moisture increases
     {
-      state = 0;
-      digitalWrite(pump, state);
-      updateLCD();
+      digitalWrite(pump, 0);
+      updateLCD(); //to continue updating the lcd while watering
     }
   }
-  else
+  else if (!state) //if the state is 0
   {
-    state = 1;
-    digitalWrite(pump, state);
+    digitalWrite(pump, 1);
   }
 }
 
 void updateLCD()
 {
+  /*
+     This function displays the time and sensors values on the LCD.
+     It is using a global variable sensIndex to change the sensor which is displayed every 2s.
+  */
   lcd.clear();
   lcd.print("Time: ");
   if (timeFlag)
