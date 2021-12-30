@@ -36,7 +36,7 @@
 
 LiquidCrystal lcd (rs, e, d4, d5, d6, d7);
 
-long lastTime = -24 * 60L * 60L * 1000L - 1;
+long lastTime = -24L * 60L * 60L * 1000L - 1;
 byte waterFlag = 1;
 byte timeFlag = 0; // 0 for morning and 1 for evening
 byte sensIndex = 0;
@@ -76,7 +76,7 @@ void loop() {
     }
     waterFlag = 1;
   }
-  else if (analogRead(tmp) * 500 / 1024.0 > tmpThreshold && millis() - lastTime > 24L * 60L * 60L * 1000) //if the temperature is HIGH and last time was before 24 hours or more
+  else if (analogRead(tmp) * 500 / 1024.0 > tmpThreshold && millis() - lastTime > 24L * 60L * 60L * 1000L) //if the temperature is HIGH and last time was before 24 hours or more
   {
     if (waterFlag)
     {
