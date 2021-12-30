@@ -36,7 +36,7 @@
 
 LiquidCrystal lcd (rs, e, d4, d5, d6, d7);
 
-int lastTime = -24 * 60 * 60 * 1000 - 1;
+long lastTime = -24 * 60L * 60L * 1000L - 1;
 byte waterFlag = 1;
 byte timeFlag = 0; // 0 for morning and 1 for evening
 byte sensIndex = 0;
@@ -58,10 +58,11 @@ void loop() {
     {
       pumping(1);
     }
-    if (!(analogRead(ldr) < earlyTimeLDRmax && analogRead(ldr) > earlyTimeLDRmin)) //to make sure that this time is finished to toggle the waterFlag again
+    while (analogRead(ldr) < earlyTimeLDRmax && analogRead(ldr) > earlyTimeLDRmin) //to wait until this time is finished to toggle the waterFlag again
     {
-      waterFlag = 1;
+      updateLCD();
     }
+    waterFlag = 1;
   }
   else if (analogRead(ldr) < sunSetTimeLDRmax && analogRead(ldr) > sunSetTimeLDRmin)
   {
@@ -69,25 +70,26 @@ void loop() {
     {
       pumping(1);
     }
-    if (!(analogRead(ldr) < sunSetTimeLDRmax && analogRead(ldr) > sunSetTimeLDRmin)) //to make sure that this time is finished to toggle the waterFlag again
+    while (analogRead(ldr) < sunSetTimeLDRmax && analogRead(ldr) > sunSetTimeLDRmin) //to wait until this time is finished to toggle the waterFlag again
     {
-      waterFlag = 1;
+      updateLCD();
     }
+    waterFlag = 1;
   }
-  else if (analogRead(tmp) * 500 / 1024.0 > tmpThreshold && millis() - lastTime > 24 * 60 * 60 * 1000) //if the temperature is HIGH and last time was before 24 hours or more
+  else if (analogRead(tmp) * 500 / 1024.0 > tmpThreshold && millis() - lastTime > 24L * 60L * 60L * 1000) //if the temperature is HIGH and last time was before 24 hours or more
   {
     if (waterFlag)
     {
       pumping(1);
       lastTime = millis(); //updating the lastTime variable value
     }
-    if (!(analogRead(tmp) * 500 / 1024.0 > tmpThreshold && millis() - lastTime > 24 * 60 * 60 * 1000)) //to make sure that this time is finished to toggle the waterFlag again
+    while (analogRead(tmp) * 500 / 1024.0 > tmpThreshold && millis() - lastTime > 24L * 60L * 60L * 1000L) //to wait until this time is finished to toggle the waterFlag again
     {
-      waterFlag = 1;
+      updateLCD();
     }
-
+    waterFlag = 1;
   }
-  else if ((1 - analogRead(soilSens) / 1024.0) < .18) // if the soil is too dry
+  else if ((1 - analogRead(soilSens) / 1024.0) < .05) // if the soil is too dry
   {
     pumping(1);
   }
