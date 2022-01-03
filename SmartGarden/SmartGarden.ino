@@ -81,12 +81,12 @@ void loop() {
     if (waterFlag)
     {
       pumping(1);
-      lastTime = millis(); //updating the lastTime variable value
     }
     while (analogRead(tmp) * 500 / 1024.0 > tmpThreshold && millis() - lastTime > 24L * 60L * 60L * 1000L) //to wait until this time is finished to toggle the waterFlag again
     {
       updateLCD();
     }
+    lastTime = millis(); //updating the lastTime variable value
     waterFlag = 1;
   }
   else if ((1 - analogRead(soilSens) / 1024.0) < .05) // if the soil is too dry
@@ -123,7 +123,7 @@ void pumping(byte state)
   /*This void function controls the pump, that it would work only if the moisture is less than 18%.
      Arguments: You should pass 1 for turning on the pump, and 0 for turning it off, otherwise, nothing happens.
   */
-  if ((1 - analogRead(soilSens) / 1024.0) < .18 && state)
+  if ((1 - analogRead(soilSens) / 1024.0) < .18 && state == 1)
   {
     while ((1 - analogRead(soilSens) / 1024.0) < .18) //continue watering until the moisture increases
     {
