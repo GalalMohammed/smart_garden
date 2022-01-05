@@ -167,7 +167,8 @@ void updateLCD()
   else if (sensIndex == 2)
   {
     lcd.print("Moisture: ");
-    lcd.print(1 - analogRead(soilSens) / 1024.0);
+    lcd.print((1 - analogRead(soilSens) / 1024.0) * 100.0);
+    lcd.print("%");
   }
   else if (sensIndex == 3)
   {
